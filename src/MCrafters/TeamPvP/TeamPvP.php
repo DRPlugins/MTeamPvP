@@ -18,8 +18,8 @@ class TeamPvP extends PluginBase implements Listener
 {
 
     // Teams
-    public $red = [];
-    public $blue = [];
+    public $darkside = [];
+    public $jetti = [];
     public $yml;
 
     public function onEnable()
@@ -32,7 +32,7 @@ class TeamPvP extends PluginBase implements Listener
         $this->getLogger()->debug("Config files have been saved!");
 
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
-        $this->getServer()->getLogger()->info(Color::BOLD . Color::GOLD . "M" . Color::AQUA . "TeamPvP " . Color::GREEN . "Enabled" . Color::RED . "!");
+        $this->getServer()->getLogger()->info(Color::BOLD . Color::GOLD . "M" . Color::AQUA . "TeamPvP " . Color::GREEN . "Enabled" . Color::darkside . "!");
     }
 
     public function isFriend($p1, $p2)
@@ -47,10 +47,10 @@ class TeamPvP extends PluginBase implements Listener
     // isFriend
     public function getTeam($p)
     {
-        if (in_array($p, $this->red)) {
-            return "red";
-        } elseif (in_array($p, $this->blue)) {
-            return "blue";
+        if (in_array($p, $this->darkside)) {
+            return "darkside";
+        } elseif (in_array($p, $this->jetti)) {
+            return "jetti";
         } else {
             return false;
         }
@@ -58,38 +58,38 @@ class TeamPvP extends PluginBase implements Listener
 
     public function setTeam($p, $team)
     {
-        if (strtolower($team) === "red") {
-            if ($this->getTeam($p) === "blue") {
-                unset($this->blue[$p]);
+        if (strtolower($team) === "darkside") {
+            if ($this->getTeam($p) === "jetti") {
+                unset($this->jetti[$p]);
             }
-            array_push($this->red, $p => $p);
-        } elseif (strtolower($team) === "blue") {
-            if ($this->getTeam($p) === "red") {
-                unset($this->red[$p]);
+            array_push($this->darkside, $p => $p);
+        } elseif (strtolower($team) === "jetti") {
+            if ($this->getTeam($p) === "darkside") {
+                unset($this->darkside[$p]);
             }
-            array_push($this->blue, $p => $p);
+            array_push($this->jetti, $p => $p);
         }
     }
 
     public function onInteract(PlayerInteractEvent $event)
     {
-        $teams = array("red", "blue");
+        $teams = array("darkside", "jetti");
         $b = $event->getBlock();
         if ($b->getX() === $this->yml["sign_join_x"] && $b->getY() === $this->yml["sign_join_y"] && $b->getZ() === $this->yml["sign_join_z"]) {
-            if (count($this->red < 5) && count($this->blue < 5)) {
+            if (count($this->darkside < 5) && count($this->jetti < 5)) {
                 $this->setTeam($event->getPlayer()->getName(), array_rand($teams, 1));
                 $event->getPlayer()->inGame = true;
-                $event->getPlayer()->teleport(new Vector3($this->yml["blue_enter_x"], $this->yml["blue_enter_y"], $this->yml["blue_enter_z"]));
-            } elseif (count($this->red < 5)) {
-                $this->setTeam($event->getPlayer()->getName(), "red");
+                $event->getPlayer()->teleport(new Vector3($this->yml["jetti_enter_x"], $this->yml["jetti_enter_y"], $this->yml["jetti_enter_z"]));
+            } elseif (count($this->darkside < 5)) {
+                $this->setTeam($event->getPlayer()->getName(), "darkside");
                 $event->getPlayer()->inGame = true;
-                $event->getPlayer()->teleport(new Vector3($this->yml["red_enter_x"], $this->yml["red_enter_y"], $this->yml["red_enter_z"]));
-            } elseif (count($this->blue) < 5) {
-                $this->setTeam($event->getPlayer()->getName(), "blue");
+                $event->getPlayer()->teleport(new Vector3($this->yml["darkside_enter_x"], $this->yml["darkside_enter_y"], $this->yml["darkside_enter_z"]));
+            } elseif (count($this->jetti) < 5) {
+                $this->setTeam($event->getPlayer()->getName(), "jetti");
                 $event->getPlayer()->inGame = true;
-                $event->getPlayer()->teleport(new Vector3($this->yml["blue_enter_x"], $this->yml["blue_enter_y"], $this->yml["blue_enter_z"]));
+                $event->getPlayer()->teleport(new Vector3($this->yml["jetti_enter_x"], $this->yml["jetti_enter_y"], $this->yml["jetti_enter_z"]));
             } else {
-                $event->getPlayer()->sendMessage("Teams are full");
+                $event->getPlayer()->sendMessage("§bStarWars §4> §7Sides are full");
             }
         }
     }
@@ -100,38 +100,38 @@ class TeamPvP extends PluginBase implements Listener
             if ($event->getEntity() instanceof Player) {
                 if ($this->isFriend($event->getDamager()->getName(), $event->getEntity()->getName())) {
                     $event->setCancelled(true);
-                    $event->getDamager()->sendMessage($event->getEntity()->getName() . " is in your team!");
+                    $event->getDamager()->sendMessage("§bStarWars §4> §8" . $event->getEntity()->getName() . " §7is in your team!");
             }
         }
     }
 
     public function onCommand(CommandSender $sender, Command $cmd, $label, array $args)
     {
-        $teams = array("red", "blue");
+        $teams = array("darkside", "jetti");
         switch ($cmd->getName()) {
             case "team": {
                 switch (strtolower($args[0])) {
-                    case "red": {
+                    case "darkside": {
                         if ($sender instanceof Player) {
-                            $this->setTeam($sender->getName(), "red");
+                            $this->setTeam($sender->getName(), "darkside");
                             $sender->inGame = true;
-                            $sender->teleport(new Vector3($this->yml["red_enter_x"], $this->yml["red_enter_y"], $this->yml["red_enter_z"]));
+                            $sender->teleport(new Vector3($this->yml["darkside_enter_x"], $this->yml["darkside_enter_y"], $this->yml["darkside_enter_z"]));
                             return true;
                         } else
                             return false;
                     }
-                    case "blue": {
+                    case "jetti": {
                         if ($sender instanceof Player) {
-                            $this->setTeam($sender->getName(), "blue");
+                            $this->setTeam($sender->getName(), "jetti");
                             $sender->inGame = true;
-                            $sender->teleport(new Vector3($this->yml["blue_enter_x"], $this->yml["blue_enter_y"], $this->yml["blue_enter_z"]));
+                            $sender->teleport(new Vector3($this->yml["jetti_enter_x"], $this->yml["jetti_enter_y"], $this->yml["jetti_enter_z"]));
                             return true;
                         } else
                             return false;
                     }
                     case "var": {
-                        var_dump($this->red);
-                        var_dump($this->blue);
+                        var_dump($this->darkside);
+                        var_dump($this->jetti);
                         return true;
                     }
                     default: {
